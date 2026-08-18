@@ -906,6 +906,38 @@ mod tests {
     }
 
     #[test]
+    fn jcode_manifest_reports_active_swarm_as_working() {
+        // The swarm gallery pushes its live status line far above the composer,
+        // while the composer itself stays ready.
+        let gallery = concat!(
+            "🐝 ▸ ⠋ 🐗 · Audit trip payout and refund/void interplay for…      26/54 active\n",
+            "   │   ⚙ read · Read _trip_out (0.0s)\n",
+            "     ⠧ 🐫 · Audit auth / rate-limit / token verification on…\n",
+            "   +51 more\n",
+            "   alt+n page · alt+↑/↓ select · alt+o open · esc exit\n",
+            "⏰ next scheduled task in 18h 38m\n",
+            "33>",
+        );
+        let collapsed = "🐝 bird done · 28/82 active · ⏰ next scheduled task in 18h 31m\n33>";
+
+        for screen in [gallery, collapsed] {
+            let detection = detect_agent(Some(Agent::Jcode), screen);
+            assert_eq!(detection.state, AgentState::Working, "screen: {screen}");
+            assert!(detection.visible_working);
+        }
+
+        // A settled swarm with no active workers stays idle.
+        for screen in [
+            "🐝 palmtree done · 0/82 active · ⏰ next scheduled task in 18h 31m\n4»",
+            "     🌴 ✓ ai asset artist · Completed · deepseek-v4-pro · DeepSeek\n4»",
+        ] {
+            let detection = detect_agent(Some(Agent::Jcode), screen);
+            assert_eq!(detection.state, AgentState::Idle, "screen: {screen}");
+            assert!(detection.visible_idle);
+        }
+    }
+
+    #[test]
     fn identify_unknown_processes() {
         assert_eq!(identify_agent("bash"), None);
         assert_eq!(identify_agent("zsh"), None);

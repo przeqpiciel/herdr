@@ -1,7 +1,7 @@
 id = "jcode"
-version = "2026.08.03.1"
+version = "2026.08.18.1"
 min_engine_version = 1
-updated_at = "2026-08-03T00:00:00Z"
+updated_at = "2026-08-18T00:00:00Z"
 aliases = ["j-code", "herdr:jcode"]
 
 # Jcode pins its composer to the bottom of the pane. The next message number is
@@ -41,6 +41,22 @@ priority = 850
 region = "bottom_non_empty_lines(4)"
 visible_idle = true
 line_regex = ['^\s*\d+[>»$]']
+
+
+# Swarm mode: the coordinator's composer can be ready (`33>`) while spawned
+# workers are still running, and the swarm gallery pushes the live status line
+# far above the recent-line window. Jcode reports live worker counts as
+# `<active>/<total> active` on a 🐝-prefixed line (gallery header or the
+# collapsed status line). A non-zero active count means the swarm is working,
+# so it must outrank `composer_ready`.
+[[rules]]
+id = "swarm_active_working"
+state = "working"
+priority = 870
+region = "whole_recent"
+visible_working = true
+line_regex = ['^\s*🐝\s.*\b[1-9]\d*/\d+ active\b']
+
 
 # Jcode emits no state-bearing OSC progress/title sequence. It also has no
 # in-session approval prompt, so there is deliberately no blocked rule. Shell
